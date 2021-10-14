@@ -1,0 +1,42 @@
+const translation = {
+    en:{
+       verifyEmail :"Please Verify Your Account",
+       verifySubj: "Email Verification",
+       hello: "Hi",
+       verifyMessage: "Welcome to Book Store! Please use this code to confirm your email.",
+       secMessage: "This email was sent to you by Book Store and only valid for 30 minutes - (Do not reply)",
+       resendVerification: "A verification code has been sent to your email",
+       forgetSubj: "Forget Password",
+       forgetMessage: "Please use this code to create new password",
+       forgetResponse: "A code has been sent to your email",
+       resetPassword: "You have reset your password correctly",
+       updatePassword: "You have updated password successfully",
+       updateProfile: "You have updated profile successfully",
+       createBook: "You have created book successfully , but it's under review",
+       updateBook: "You have updated book successfully",
+       deleteBook: "You have deleted book successfully",
+       rateBook: 'Rate book successfully',
+       deleteUser: 'Delete user successfully',
+    },
+    ar: {
+        verifyEmail :"يرجي تأكيد حسابك",
+        verifySubj: "تأكيد الحساب",
+        hello: "مرحبا",
+        verifyMessage: "مرحبا بك في Book Store, من فضلك استخدم هذا الرمز لتنشيط حسابك",
+        secMessage: "تم إرسال هذا البريد الإلكتروني إليك عن طريق Book Store وهو صالح لمدة 30 دقيقة فقط - (لا ترد)",
+        resendVerification: "تم إرسال رمز التحقق إلى بريدك الإلكتروني",
+        forgetSubj: "نسيان كلمه المرور",
+        forgetMessage: "الرجاء استخدام هذا الرمز لإنشاء كلمة مرور جديدة",
+        forgetResponse: "تم ارسال الرمز للبريد الالكتروني",
+        resetPassword: "لقد قمت بإعادة تعيين كلمة المرور الخاصة بك بشكل صحيح",
+        updatePassword: "لقد قمت بتحديث كلمه المرور بنجاح",
+        updateProfile: "لقد قمت بتحديث الملف الشخصي بنجاح",
+        createBook: "لقد أنشأت الكتاب بنجاح ، قيد المراجعة في الوقت الحالي",
+        updateBook: "لقد قمت بتحديث الكتاب بنجاح",
+        deleteBook: "لقد قمت بحذف الكتاب بنجاح",
+        rateBook: 'قمت بتقييم الكتاب بنجاح',
+        deleteUser: 'تم حذف المستخدم بنجاح',
+    }
+}
+
+module.exports = translation;
