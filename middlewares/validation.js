@@ -50,6 +50,7 @@ const updateUserSchema = Joi.object({
 });
 const createBookSchema = Joi.object({
     cover: any,
+    file: any,
     name: bookLetters,
     description: bookLetters,
     price: number.required(),
@@ -57,6 +58,7 @@ const createBookSchema = Joi.object({
 });
 const updateBookSchema = Joi.object({
     cover: any,
+    file: any,
     name: bookLetters.optional(),
     description: bookLetters.optional(),
     price: number,
@@ -77,7 +79,7 @@ const genericValidation = (schema, withImage = false, key='avatar') => asyncHand
     if(withImage){
          const imageKey = (req.body)[key];
         if(imageKey || imageKey === ""){
-            next({name: "MulterError", message: "Unsupported image type for avatar only jpg, jpeg, png"})
+            next({name: "MulterError", message: `Unsupported image type for ${key} only jpg, jpeg, png`})
         }
     }
     await schemas[schema].validateAsync(req.body, validationErrorOptions);

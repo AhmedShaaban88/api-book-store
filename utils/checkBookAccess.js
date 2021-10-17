@@ -9,7 +9,7 @@ const checkAuthorBookAccess = async (bookId, userId) => {
 }
 
 const checkPublishedBook = async (bookId, userId) => {
-    const book = await Book.findById(bookId).lean().select('views pages name description price cover avgRate author status').populate({
+    const book = await Book.findById(bookId).lean().select('views pages name description price cover file avgRate author status').populate({
         path: 'author',
         select: "email avatar firstName lastName fullName -_id"
     });

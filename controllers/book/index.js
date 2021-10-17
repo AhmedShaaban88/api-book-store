@@ -3,7 +3,7 @@ const catchError = require('http-errors');
 const Book = require('../../models/book');
 const translation = require("../../utils/translation");
 const {checkAuthorBookAccess, checkPublishedBook} = require("../../utils/checkBookAccess");
-const {removeImage} = require('../../utils/cloudinary');
+const {removeFile} = require('../../utils/cloudinary');
 const {ObjectId} = require('mongoose').Types;
 const createBook = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
@@ -16,28 +16,33 @@ const createBook = asyncHandler(async (req, res, next) => {
         description: description,
         price: price,
     })
-    if (req.file){
-        const {path} = req.file;
-        newBook.cover = path;
+    if (req.files){
+        const {path} = req.files.file ? req.files.file[0] : {};
+        newBook.file = path;
+        const {path:coverPath} = req.files.cover ? req.files.cover[0] : {};
+        newBook.cover = coverPath;
     }
     const book = await newBook.save()
     if(book) res.status(201).json({message: translation[lang].createBook});
 });
 const editBook = asyncHandler(async (req, res, next) => {
-    let newBookCover
+    let newBookCover, newBookFile;
     const {lang} = req.query;
     const {id: userId} = req.user;
     const {id: bookId} = req.params;
     const book = await checkAuthorBookAccess(bookId, userId);
     if(!book) return next(book);
     const {name, pages, description, price} = req.body;
-    if(!name && !pages && !req.file && !description && !price) return next(catchError.BadRequest('Empty body is not allowed'));
-    if (req.file){
-        if(book.cover) await removeImage(book.cover, 'book-cover')
-        const {path} = req.file;
-        newBookCover = path;
+    if(!name && !pages && !req.files && !description && !price) return next(catchError.BadRequest('Empty body is not allowed'));
+    if (req.files){
+        const {path} = req.files.file ? req.files.file[0] : {};
+        if(book.file && path) await removeFile(book.file, 'books');
+        newBookFile = path;
+        const {path:coverPath} = req.files.cover ? req.files.cover[0] : {};
+        if(book.cover && coverPath) await removeFile(book.cover, 'books');
+        newBookCover = coverPath;
     }
-    const updatedBook = await Book.updateOne({_id:bookId}, {$set: {name: name, description: description, price: price, pages: pages, cover: newBookCover}}, {omitUndefined: true, runValidators: true, lean: true});
+    const updatedBook = await Book.updateOne({_id:ObjectId(bookId)}, {$set: {name: name, description: description, price: price, pages: pages, file: newBookFile ,cover: newBookCover}}, {omitUndefined: true, runValidators: true, lean: true});
     if(updatedBook.nModified > 0){
         return res.status(200).json({message: translation[lang].updateBook})
     }
@@ -49,7 +54,9 @@ const deleteBook = asyncHandler(async (req, res, next) => {
     const {id: userId} = req.user;
     const {id: bookId} = req.params;
     const book = await checkAuthorBookAccess(bookId, userId);
-    if(!book) return next(book)
+    if(!book) return next(book);
+    if(book.file) await removeFile(book.file, 'books');
+    if(book.cover) await removeFile(book.cover, 'books');
     const deletedBook = await Book.deleteOne({_id: bookId}, {runValidators: true, lean: true});
     if(deletedBook.deletedCount > 0){
         return res.status(200).json({message: translation[lang].deleteBook})

@@ -14,9 +14,9 @@ protectedRoutes.put("/profile/update-password", authorizedUser,genericValidation
 protectedRoutes.get("/profile/:id", authorizedUser, checkIdParam('userId') ,viewProfile);
 
 // book routes
-protectedRoutes.post("/book/create", authorizedUser,checkRole('author'),mediaUploader('book-cover').single('cover'), genericValidation('createBookSchema', true, 'cover') ,createBook);
+protectedRoutes.post("/book/create", authorizedUser,checkRole('author'),mediaUploader('books').fields([{name: 'file', maxCount: 1}, {name: 'cover', maxCount: 1}]), genericValidation('createBookSchema', true, 'cover') ,createBook);
 protectedRoutes.put("/book/edit/:id", authorizedUser, checkRole('author'),checkIdParam('bookId'),
-    mediaUploader('book-cover').single('cover'), genericValidation('updateBookSchema', true, 'cover') ,editBook);
+    mediaUploader('books').fields([{name: 'file', maxCount: 1}, {name: 'cover', maxCount: 1}]), genericValidation('updateBookSchema', true, 'cover') ,editBook);
 protectedRoutes.delete("/book/:id", authorizedUser, checkRole('author'), checkIdParam('bookId'), deleteBook);
 
 // admin routes

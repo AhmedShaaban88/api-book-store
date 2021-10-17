@@ -3,7 +3,7 @@ const catchError = require('http-errors');
 const User = require("../../models/user");
 const {decryptPassword} = require('../../utils/password');
 const translation = require("../../utils/translation");
-const {removeImage} = require('../../utils/cloudinary');
+const {removeFile} = require('../../utils/cloudinary');
 
 const editProfile = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
@@ -14,7 +14,7 @@ const editProfile = asyncHandler(async (req, res, next) => {
     const user = await User.findById(id).lean();
     if(user.firstName === firstName || user.lastName === lastName) return next(catchError.Conflict('You have entered the same name'));
     if (req.file){
-        if(user.avatar) await removeImage(user.avatar, 'user-avatar')
+        if(user.avatar) await removeFile(user.avatar, 'user-avatar')
         const {path} = req.file;
         newAvatar = path;
     }

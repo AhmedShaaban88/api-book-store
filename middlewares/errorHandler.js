@@ -1,7 +1,13 @@
-const {removeImage} = require("../utils/cloudinary");
+const {removeFile} = require("../utils/cloudinary");
 module.exports = function (err, req, res, next) {
     if(req.file){
-        removeImage(req.file.path, req.file.filename.split('/')[0]).then(r => next()).catch(e =>res.status(500).json({error: 'Unexpected error with cloudinary'}));
+        removeFile(req.file.path, req.file.filename.split('/')[0]).then(r => next()).catch(e =>res.status(500).json({error: 'Unexpected error with cloudinary'}));
+    }
+    if(req.files){
+        const {path, filename} = req.files.file ? req.files.file[0] : {};
+        const {path:coverPath, filename: coverFilename} = req.files.cover ? req.files.cover[0] : {};
+        path && removeFile(path, filename?.split('/')[0]).then(r => next()).catch(e =>res.status(500).json({error: 'Unexpected error with cloudinary'}));
+        coverPath && removeFile(coverPath, coverFilename?.split('/')[0]).then(r => next()).catch(e =>res.status(500).json({error: 'Unexpected error with cloudinary'}));
     }
     if(err.name === "ValidationError"){
         return res.status(422).json({error: err.message});
@@ -10,7 +16,7 @@ module.exports = function (err, req, res, next) {
             return res.status(409).json({ error: `${err.keyPattern.email === 1 ? 'Email' : 'Book name'} is already in used` });
     }
     else if(err.code === "LIMIT_FILE_SIZE"){
-        return res.status(400).json({error: "File must be less than or equal 0.5 MB"});
+        return res.status(400).json({error: `${err.field} must be less than or equal 5 MB`});
     }
     else if(err.name === 'MulterError'){
         return res.status(400).json({error: err.message});

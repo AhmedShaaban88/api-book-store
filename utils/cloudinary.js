@@ -14,35 +14,36 @@ function mediaUploader(folder){
         cloudinary: cloudinary,
         params: {
             folder: folder,
-            resource_type: 'image',
             discard_original_filename: true,
         },
     });
 
     return multer({
         storage: storage,
-        limits: {fileSize: 500000},
+        limits: {fileSize: 5000000},
         fileFilter: function (req, file, cb) {
-            let filetypes = /jpeg|jpg|png/;
-            let mimetype = filetypes.test(file.mimetype);
-            let extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+            let imageTypes = /jpeg|jpg|png/;
+            let fileTypes = /pdf/;
+            const type = file.fieldname === 'file' ? fileTypes : imageTypes;
+            let mimetype = type.test(file.mimetype);
+            let extname = type.test(path.extname(file.originalname).toLowerCase());
             if (mimetype && extname) {
                 return cb(null, true);
             }
-            cb({name: "MulterError", message: "Unsupported image type only jpg, jpeg, png"}, false);
+            cb({name: "MulterError", message: file.fieldname === 'file' ? "Unsupported book file type only pdf":"Unsupported image type only jpg, jpeg, png"}, false);
         },
     });
 
 }
 
-const getImagePublicId = (imageURL, folder) => {
-    const image = imageURL.split(`${folder}/`)[1].split('.')[0]
+const getFilePublicId = (fileURL, folder) => {
+    const image = fileURL.split(`${folder}/`)[1].split('.')[0]
     return folder + '/' + image;
 }
 
-const removeImage = (imageURL, folder) => {
-    const id = getImagePublicId(imageURL, folder);
+const removeFile = (fileURL, folder) => {
+    const id = getFilePublicId(fileURL, folder);
     return cloudinary.uploader.destroy(id);
 }
 
-module.exports = {mediaUploader, removeImage};
+module.exports = {mediaUploader , removeFile};

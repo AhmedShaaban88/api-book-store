@@ -15,7 +15,7 @@ const bookSchema = new Schema({
     rating: [{type: rateSchema, select: false}],
     avgRate: {type: Number, default: 0},
     views: {type: Schema.Types.Array, select: false, transform: (views) => views, get: (views) => views.length || 0},
-    // downloads: {type: Schema.Types.Array, select: false, transform: (downloads) => downloads.length || 0},
+    downloads: {type: Schema.Types.Array, select: false, transform: (downloads) => downloads.length || 0, default: 0},
     pages: {type: Number, default: 1, min: 1, required: true, select: false},
     author: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     description: {type: [
@@ -23,6 +23,7 @@ const bookSchema = new Schema({
             value: {type: String, trim: true}
         }
     ], select: false},
+    file: {type: String, required: true},
     price: {type: Number, default: 0},
     cover: String,
     status: {type: Number, enum: [0,1], default: 0}
