@@ -10,7 +10,6 @@ const langInterceptor = require('./middlewares/langInterceptor');
 const publicRoutes = require('./routes/public');
 const protectedRoutes = require('./routes/protected');
 const app = express();
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
@@ -23,6 +22,6 @@ app.use(`/api${process.env.api_version}/auth`, protectedRoutes);
 app.use(function (req, res, next) {
     next(catchError.NotFound());
 });
-app.use(errorHandler)
+app.use(errorHandler);
 
 module.exports = app;

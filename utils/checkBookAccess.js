@@ -2,14 +2,14 @@ const catchError = require("http-errors");
 const Book = require("../models/book");
 
 const checkAuthorBookAccess = async (bookId, userId) => {
-    const book = await Book.findById(bookId).lean();
+    const book = await Book.findById(bookId).select('name pages description file price cover author views downloads');
     if(!book) return Promise.reject(catchError.NotFound('This book not exists'));
     else if(String(book.author) !== String(userId)) return Promise.reject(catchError.Forbidden('You haven\'t access to this book'));
     return Promise.resolve(book);
 }
 
 const checkPublishedBook = async (bookId, userId) => {
-    const book = await Book.findById(bookId).lean().select('views pages name description price cover file avgRate author status').populate({
+    const book = await Book.findById(bookId).lean().select('views pages name description price cover avgRate author status').populate({
         path: 'author',
         select: "email avatar firstName lastName fullName -_id"
     });

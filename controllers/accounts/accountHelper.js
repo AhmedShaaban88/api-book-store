@@ -4,6 +4,7 @@ const catchError = require('http-errors');
 const sendEmail = require('../../utils/sendEmail');
 const translation = require("../../utils/translation");
 const {generateToken, generateRefreshToken, verifyRefreshToken} = require("../../utils/token");
+const killCurrentWorker = require("../../utils/killWorker");
 const resendVerificationEmail = asyncHandler(async (req, res, next)  => {
     const {email} = req.body;
     const {lang} = req.query;
@@ -18,6 +19,7 @@ const resendVerificationEmail = asyncHandler(async (req, res, next)  => {
     if(newUser.nModified > 0){
         await sendEmail(lang, email,user.fullName, verifiedInfo.verifyCode, translation[lang].verifySubj ,translation[lang].verifyMessage, (err, response) => {
             if(response){
+                killCurrentWorker();
                 return res.status(200).json({message: translation[lang].resendVerification});
             }
             return next(err);
@@ -36,6 +38,7 @@ const verifyAccount = asyncHandler(async (req, res, next)  => {
         const token = await generateToken(user);
         const refreshToken = await generateRefreshToken(user);
         if(token && refreshToken){
+            killCurrentWorker();
             return res.status(200).json({
                 name: user.fullName,
                 email: user.email,
@@ -54,6 +57,7 @@ const generateNewToken = asyncHandler(async (req, res, next)  => {
     if(validRefreshToken){
         const {email, sub: id, role} = validRefreshToken;
         const token = await generateToken({email, role, id});
+        killCurrentWorker();
         return res.status(200).json({accessToken: token});
     }
 });
@@ -70,6 +74,7 @@ const forgetPassword = asyncHandler(async (req,res,next) => {
     if(newUser.nModified > 0){
         await sendEmail(lang, email,user.fullName, forgetPasswordInfo.forgetCode, translation[lang].forgetSubj ,translation[lang].forgetMessage, (err, response) => {
             if(response){
+                killCurrentWorker();
                 return res.status(200).json({message: translation[lang].forgetResponse});
             }
             return next(err);
@@ -86,6 +91,7 @@ const resetPassword = asyncHandler(async (req,res,next) => {
     else if(Date.now() > user.forgetCodeExpires) return next(catchError.BadRequest('the code is expired'));
     const updateUser = await User.updateOne({email: email}, {$set: {password: password},$unset: {forgetCode: "", forgetCodeExpires: ""}});
     if(updateUser.nModified > 0){
+        killCurrentWorker();
         return res.status(200).json({message: translation[lang].resetPassword});
 
     }

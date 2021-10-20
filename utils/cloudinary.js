@@ -45,5 +45,9 @@ const removeFile = (fileURL, folder) => {
     const id = getFilePublicId(fileURL, folder);
     return cloudinary.uploader.destroy(id);
 }
+const downloadFile = (fileURL) => {
+    const DownloadURLSplits = fileURL.split('upload');
+    return DownloadURLSplits[0] + "upload/" + 'fl_attachment' + DownloadURLSplits[1];
+}
 
-module.exports = {mediaUploader , removeFile};
+module.exports = {mediaUploader , removeFile, downloadFile};

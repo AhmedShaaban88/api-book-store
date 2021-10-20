@@ -5,7 +5,8 @@ const debug = require('debug')('book-store:server');
 const http = require('http');
 const { createTerminus } = require('@godaddy/terminus');
 const mongoose = require('mongoose');
-
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
 const port = normalizePort(process.env.PORT || '4000');
 app.set('port', port);
 
@@ -47,9 +48,23 @@ const options = {
 }
 createTerminus(server, options)
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+if (cluster.isMaster) {
+  // Fork workers.
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    process.env.NODE_ENV === "dev" && console.log(`worker ${worker.process.pid} died ${worker.id}`);
+    cluster.fork();
+  });
+}else {
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+}
+
+
 function normalizePort(val) {
   const port = parseInt(val, 10);
 

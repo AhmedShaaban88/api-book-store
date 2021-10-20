@@ -2,6 +2,8 @@ const User = require("../../models/user");
 const asyncHandler = require('express-async-handler');
 const sendEmail = require('../../utils/sendEmail');
 const translation = require("../../utils/translation");
+const killCurrentWorker = require("../../utils/killWorker");
+
 const register = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
     const {email, role, firstName, lastName, password} = req.body;
@@ -22,6 +24,7 @@ const register = asyncHandler(async (req, res, next) => {
     if(user){
         await sendEmail(lang, email,user.fullName, user.verifyCode, translation[lang].verifySubj ,translation[lang].verifyMessage, (err, response) => {
             if(response){
+                killCurrentWorker();
                 return res.status(201).json({
                     message: translation[lang].verifyEmail,
                     userId: user._id,

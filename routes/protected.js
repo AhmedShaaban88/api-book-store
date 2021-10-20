@@ -6,7 +6,7 @@ const genericValidation = require("../middlewares/validation");
 const {mediaUploader} = require("../utils/cloudinary");
 const {editProfile, updatePassword, viewProfile} = require("../controllers/profile");
 const {createBook, editBook, deleteBook, books, searchBooks} = require("../controllers/book");
-const {rateBook, publishBook} = require("../controllers/book/bookHelper");
+const {rateBook, publishBook, downloadBook} = require("../controllers/book/bookHelper");
 const {deleteUser} = require("../controllers/admin");
 // profile routes
 protectedRoutes.put("/profile/edit", authorizedUser,mediaUploader('user-avatar').single('avatar'),genericValidation('updateUserSchema', true), editProfile);
@@ -25,6 +25,7 @@ protectedRoutes.put("/admin/toggle-publish/:id", authorizedUser, checkRole("admi
 
 //any user
 protectedRoutes.put("/rate/:id", authorizedUser, checkRole('user') ,checkIdParam('bookId'),genericValidation('rateSchema'), rateBook)
+protectedRoutes.get("/download/:id", authorizedUser ,checkIdParam('bookId'), downloadBook)
 protectedRoutes.get("/books/:id", authorizedUser, checkIdParam("authorId"),genericValidation('getBooksSchema'), books)
 protectedRoutes.get("/search-books", authorizedUser, searchBooks)
 module.exports = protectedRoutes;
