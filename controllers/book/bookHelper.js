@@ -4,7 +4,6 @@ const Book = require('../../models/book');
 const User = require('../../models/user');
 const translation = require("../../utils/translation");
 const {downloadFile} = require("../../utils/cloudinary");
-const killCurrentWorker = require("../../utils/killWorker");
 const rateBook = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
     const {id: userId} = req.user;
@@ -16,7 +15,6 @@ const rateBook = asyncHandler(async (req, res, next) => {
     if(rateExists < 0){
         const avgBookRate = bookExists.rating.reduce((currentRate,{rate: prevRate}) => currentRate + prevRate, rate) / (bookExists.rating.length + 1);
         await Book.updateOne({_id: bookId}, {$push: {rating: {userId, rate}}, $set: {avgRate: avgBookRate.toFixed(2)}}, {lean: true, new: true});
-        killCurrentWorker();
         return res.status(200).json({message: translation[lang].rateBook});
     }
     return next(catchError.Conflict('This user has rated this book before'));
@@ -27,7 +25,6 @@ const publishBook = asyncHandler(async (req, res, next) => {
     const book = await Book.findById(bookId).lean().select('status');
     if(!book) return next(catchError.NotFound('This book doesn\'t exists'));
     const newBook = await Book.updateOne({_id: bookId}, {status: book.status === 0 ? 1 : 0}, {lean: true, new: true});
-    killCurrentWorker();
     if(newBook.nModified > 0) return res.status(200).json({message: translation[lang].updateBook});
     return next(catchError.UnprocessableEntity('Error while updating this book'));
 });
@@ -42,7 +39,6 @@ const downloadBook = asyncHandler(async (req, res, next) => {
         await Book.updateOne({_id: bookId}, {$addToSet: {downloads: userId}});
         await User.findByIdAndUpdate(userId, {$addToSet: {library: bookId}}, {projection: 'library', omitUndefined: true});
     }
-    killCurrentWorker();
     return res.status(200).json(downloadFile(book.file));
 });
 

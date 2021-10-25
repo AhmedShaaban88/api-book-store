@@ -23,5 +23,4 @@ app.use(function (req, res, next) {
     next(catchError.NotFound());
 });
 app.use(errorHandler);
-
 module.exports = app;

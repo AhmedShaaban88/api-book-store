@@ -1,7 +1,5 @@
 const {removeFile} = require("../utils/cloudinary");
-const killCurrentWorker = require("../utils/killWorker");
 module.exports = function (err, req, res, next) {
-    killCurrentWorker();
     if(req.file){
         removeFile(req.file.path, req.file.filename.split('/')[0]).then(r => next()).catch(e =>res.status(500).json({error: 'Unexpected error with cloudinary'}));
     }

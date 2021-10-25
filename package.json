@@ -32,6 +32,7 @@
     "nodemailer": "^6.6.3"
   },
   "devDependencies": {
+    "loadtest": "^5.1.2",
     "nodemon": "^2.0.12"
   }
 }

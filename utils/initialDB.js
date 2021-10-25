@@ -7,7 +7,7 @@ mongoose.connect(process.env.db_URL, {
     useFindAndModify: false,
     useCreateIndex: true,
     poolSize: 10,
-    dbName: 'book-store',
+    dbName: process.env.DB_NAME,
     readConcern: 'majority',
     writeConcern:{
         w: 'majority',

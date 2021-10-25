@@ -4,7 +4,6 @@ const User = require("../../models/user");
 const {decryptPassword} = require('../../utils/password');
 const translation = require("../../utils/translation");
 const {removeFile} = require('../../utils/cloudinary');
-const killCurrentWorker = require("../../utils/killWorker");
 
 const editProfile = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
@@ -21,7 +20,6 @@ const editProfile = asyncHandler(async (req, res, next) => {
     }
     const updatedUser = await User.updateOne({_id:id}, {$set: {firstName: firstName, lastName: lastName, avatar: newAvatar}}, {omitUndefined: true, runValidators: true, lean: true});
     if(updatedUser.nModified > 0){
-        killCurrentWorker();
         return res.status(200).json({message: translation[lang].updateProfile})
     }
     return next(catchError.UnprocessableEntity('Error while updating this user'));
@@ -37,7 +35,6 @@ const updatePassword = asyncHandler(async (req, res, next) => {
     if(!authenticated) return next(catchError.BadRequest('The old password you have entered is incorrect'));
     const updateUser = await User.updateOne({_id: id}, {$set: {password: password}});
     if(updateUser.nModified > 0){
-        killCurrentWorker();
         return res.status(200).json({message: translation[lang].updatePassword})
     }
     return next(catchError.UnprocessableEntity('Error while updating this book'));
@@ -46,7 +43,6 @@ const viewProfile = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
     const user = await User.findById(id).lean({virtuals: true}).select("-__v -_id");
     if(!user) return next(catchError.NotFound('This book does not exist'));
-    killCurrentWorker();
     return res.status(200).json(user)
 });
 
