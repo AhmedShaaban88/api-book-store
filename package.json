@@ -29,7 +29,8 @@
     "mongoose-paginate-v2": "^1.4.2",
     "multer": "^1.4.3",
     "multer-storage-cloudinary": "^4.0.0",
-    "nodemailer": "^6.6.3"
+    "nodemailer": "^6.6.3",
+    "paypal-rest-sdk": "^1.8.1"
   },
   "devDependencies": {
     "loadtest": "^5.1.2",

@@ -6,6 +6,7 @@ const updateVersionKey = require("../utils/updateVersionKey");
 
 const userSchema = new Schema({
     email: {type: String, required: true, lowercase: true, trim: true},
+    paypalEmail: {type: String, lowercase: true, trim: true, select: true},
     avatar: String,
     role: {type: String, enum: ['user', 'author', 'admin'], default: 'user', lowercase: true},
     firstName: {type: String, minlength: 2,trim: true},

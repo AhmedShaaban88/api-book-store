@@ -16,7 +16,9 @@ app.use(helmet());
 app.use(compression())
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(langInterceptor)
+app.use(langInterceptor);
+
+
 app.use(`/api${process.env.api_version}`, publicRoutes);
 app.use(`/api${process.env.api_version}/auth`, protectedRoutes);
 app.use(function (req, res, next) {

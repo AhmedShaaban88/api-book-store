@@ -5,13 +5,14 @@ const translation = require("../../utils/translation");
 
 const register = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
-    const {email, role, firstName, lastName, password} = req.body;
+    const {email, role, firstName, lastName, password, paypalEmail} = req.body;
     const newUser = new User({
         email: email,
         password: password,
         role: role,
         firstName: firstName,
         lastName: lastName,
+        paypalEmail: paypalEmail,
         verifyCode: Math.floor(1000000 + Math.random() * 9000000),
         verifyCodeExpires: Date.now() + 1800000,
     });

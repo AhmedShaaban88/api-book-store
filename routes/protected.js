@@ -6,7 +6,7 @@ const genericValidation = require("../middlewares/validation");
 const {mediaUploader} = require("../utils/cloudinary");
 const {editProfile, updatePassword, viewProfile} = require("../controllers/profile");
 const {createBook, editBook, deleteBook, books, searchBooks} = require("../controllers/book");
-const {rateBook, publishBook, downloadBook} = require("../controllers/book/bookHelper");
+const {rateBook, publishBook, downloadBook, purchaseBookByPaypal, purchaseBookByPaypalSuccess, purchaseBookByPaypalFail} = require("../controllers/book/bookHelper");
 const {deleteUser, backupDatabase, restoreDatabase} = require("../controllers/admin");
 // profile routes
 protectedRoutes.put("/profile/edit", authorizedUser,mediaUploader('user-avatar').single('avatar'),genericValidation('updateUserSchema', true), editProfile);
@@ -26,7 +26,10 @@ protectedRoutes.get("/admin/backup", authorizedUser, checkRole("admin"), backupD
 protectedRoutes.get("/admin/restore", authorizedUser, checkRole("admin"), restoreDatabase)
 //any user
 protectedRoutes.put("/rate/:id", authorizedUser, checkRole('user') ,checkIdParam('bookId'),genericValidation('rateSchema'), rateBook)
-protectedRoutes.get("/download/:id", authorizedUser ,checkIdParam('bookId'), downloadBook)
+protectedRoutes.get("/download/:id", authorizedUser ,checkIdParam('bookId'), downloadBook);
+protectedRoutes.get("/purchase/paypal/fail", purchaseBookByPaypalFail);
+protectedRoutes.get("/purchase/paypal/:id", authorizedUser ,checkIdParam('bookId'), purchaseBookByPaypal);
+protectedRoutes.get("/purchase/paypal/:id/success",authorizedUser, checkIdParam('bookId'), purchaseBookByPaypalSuccess);
 protectedRoutes.get("/books/:id", authorizedUser, checkIdParam("authorId"),genericValidation('getBooksSchema'), books)
 protectedRoutes.get("/search-books", authorizedUser, searchBooks)
 module.exports = protectedRoutes;

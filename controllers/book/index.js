@@ -71,16 +71,18 @@ const getBook = asyncHandler(async (req,res,next) => {
     if(userId && !ObjectId.isValid(userId)) return next(catchError.BadRequest('User id is not valid'));
     const {hash: deviceId, components:{useragent: {browser: {family: deviceType}}}} = req.fingerprint;
     let bookExists = await checkPublishedBook(bookId, userId);
+    const hasPurchase = (bookExists.price > 0 && bookExists.downloads.includes(userId)) || (bookExists.price > 0 && String(bookExists.author._id) === String(userId));
+    delete bookExists.downloads;
     if(deviceType.toLowerCase() !== "other"){
         if(!bookExists) return next(catchError.NotFound('This book doesn\'t exists'));
         const userView = bookExists.views.includes(deviceId);
         if(!userView){
             await Book.findByIdAndUpdate(bookId, {$addToSet: {views: deviceId}}, {omitUndefined: true,lean: {getters: false}, new: true});
-            bookExists = {...bookExists.toObject(), views:bookExists.views.length + 1};
+            bookExists = {...bookExists.toObject(), views:bookExists.views.length + 1, hasPurchase: hasPurchase};
             return res.status(200).json(bookExists);
         }
     }
-    return res.status(200).json({...bookExists, views: bookExists.views.length})
+    return res.status(200).json({...bookExists, views: bookExists.views.length, hasPurchase: hasPurchase})
 });
 const books = asyncHandler(async (req,res,next) => {
     const {id: authorId} = req.params;

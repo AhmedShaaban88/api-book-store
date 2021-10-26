@@ -10,6 +10,7 @@ const asyncHandler = require('express-async-handler')
 const validationErrorOptions = {errors: { wrap: {label: false}}};
 
 const email = string.email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required();
+const paypalEmail = string.email({ minDomainSegments: 2, tlds: { allow: ['com'] } });
 const password = string.pattern(new RegExp(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/)).message('password must be more than 7 characters with at least a number, a letter and a special character').required();
 const code = number.integer().greater(999999).less(10000000).required();
 const bookLang = string.required().valid('en', 'ara');
@@ -31,6 +32,7 @@ const resetPasswordSchema = passwordSchema.append({email: email, code: code});
 
 const userSchema = passwordSchema.append({
     email: email,
+    paypalEmail: paypalEmail,
     avatar: any,
     role: string.lowercase().trim().valid('user', 'author', 'admin'),
     firstName: string.min(2).trim(),
@@ -44,6 +46,7 @@ const updatePasswordSchema = passwordSchema.append({
     oldPassword: string.required()
 });
 const updateUserSchema = Joi.object({
+    paypalEmail: paypalEmail,
     avatar: any,
     firstName: string.min(2).trim(),
     lastName: string.min(2).trim()

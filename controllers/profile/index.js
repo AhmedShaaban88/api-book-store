@@ -7,9 +7,9 @@ const {removeFile} = require('../../utils/cloudinary');
 
 const editProfile = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
-    const {firstName, lastName} = req.body;
+    const {firstName, lastName, paypalEmail} = req.body;
     let newAvatar;
-    if(!firstName && !lastName && !req.file) return next(catchError.BadRequest('Empty body is not allowed'));
+    if(!firstName && !lastName && !req.file && !paypalEmail) return next(catchError.BadRequest('Empty body is not allowed'));
     const {id} = req.user;
     const user = await User.findById(id).lean();
     if(user.firstName === firstName || user.lastName === lastName) return next(catchError.Conflict('You have entered the same name'));
@@ -18,7 +18,7 @@ const editProfile = asyncHandler(async (req, res, next) => {
         const {path} = req.file;
         newAvatar = path;
     }
-    const updatedUser = await User.updateOne({_id:id}, {$set: {firstName: firstName, lastName: lastName, avatar: newAvatar}}, {omitUndefined: true, runValidators: true, lean: true});
+    const updatedUser = await User.updateOne({_id:id}, {$set: {firstName: firstName, lastName: lastName, avatar: newAvatar, paypalEmail: paypalEmail}}, {omitUndefined: true, runValidators: true, lean: true});
     if(updatedUser.nModified > 0){
         return res.status(200).json({message: translation[lang].updateProfile})
     }
@@ -42,7 +42,7 @@ const updatePassword = asyncHandler(async (req, res, next) => {
 const viewProfile = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
     const user = await User.findById(id).lean({virtuals: true}).select("-__v -_id");
-    if(!user) return next(catchError.NotFound('This book does not exist'));
+    if(!user) return next(catchError.NotFound('This user does not exist'));
     return res.status(200).json(user)
 });
 
