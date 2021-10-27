@@ -4,7 +4,7 @@ const authorizedUser = require("../middlewares/authorizedUser");
 const {checkRole, checkIdParam} = require("../middlewares/checkUser");
 const genericValidation = require("../middlewares/validation");
 const {mediaUploader} = require("../utils/cloudinary");
-const {editProfile, updatePassword, viewProfile} = require("../controllers/profile");
+const {editProfile, updatePassword, viewProfile, userLibrary} = require("../controllers/profile");
 const {createBook, editBook, deleteBook, books, searchBooks} = require("../controllers/book");
 const {rateBook, publishBook, downloadBook, purchaseBookByPaypal, purchaseBookByPaypalSuccess, purchaseBookByPaypalFail} = require("../controllers/book/bookHelper");
 const {deleteUser, backupDatabase, restoreDatabase} = require("../controllers/admin");
@@ -22,14 +22,15 @@ protectedRoutes.delete("/book/:id", authorizedUser, checkRole('author'), checkId
 // admin routes
 protectedRoutes.delete("/admin/del-user/:id", authorizedUser, checkRole('admin'), checkIdParam('userId'), deleteUser);
 protectedRoutes.put("/admin/toggle-publish/:id", authorizedUser, checkRole("admin"), checkIdParam("bookId"), publishBook);
-protectedRoutes.get("/admin/backup", authorizedUser, checkRole("admin"), backupDatabase)
-protectedRoutes.get("/admin/restore", authorizedUser, checkRole("admin"), restoreDatabase)
+protectedRoutes.get("/admin/backup", authorizedUser, checkRole("admin"), backupDatabase);
+protectedRoutes.get("/admin/restore", authorizedUser, checkRole("admin"), restoreDatabase);
 //any user
-protectedRoutes.put("/rate/:id", authorizedUser, checkRole('user') ,checkIdParam('bookId'),genericValidation('rateSchema'), rateBook)
+protectedRoutes.put("/rate/:id", authorizedUser, checkRole('user') ,checkIdParam('bookId'),genericValidation('rateSchema'), rateBook);
 protectedRoutes.get("/download/:id", authorizedUser ,checkIdParam('bookId'), downloadBook);
 protectedRoutes.get("/purchase/paypal/fail", purchaseBookByPaypalFail);
 protectedRoutes.get("/purchase/paypal/:id", authorizedUser ,checkIdParam('bookId'), purchaseBookByPaypal);
 protectedRoutes.get("/purchase/paypal/:id/success",authorizedUser, checkIdParam('bookId'), purchaseBookByPaypalSuccess);
-protectedRoutes.get("/books/:id", authorizedUser, checkIdParam("authorId"),genericValidation('getBooksSchema'), books)
-protectedRoutes.get("/search-books", authorizedUser, searchBooks)
+protectedRoutes.get("/books/:id", authorizedUser, checkIdParam("authorId"),genericValidation('getBooksSchema'), books);
+protectedRoutes.get("/search-books", authorizedUser, searchBooks);
+protectedRoutes.get("/library", authorizedUser, userLibrary);
 module.exports = protectedRoutes;

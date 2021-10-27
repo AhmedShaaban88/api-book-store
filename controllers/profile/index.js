@@ -45,5 +45,15 @@ const viewProfile = asyncHandler(async (req, res, next) => {
     if(!user) return next(catchError.NotFound('This user does not exist'));
     return res.status(200).json(user)
 });
+const userLibrary = asyncHandler(async (req,res,next) => {
+    const {id}  = req.user;
+    const {skip, limit} = req.query;
+    let currentSkip = parseInt(skip);
+    let currentLimit = parseInt(limit);
+    if(limit < 1 || !Boolean(currentLimit)) currentLimit =1;
+    if(skip < 0 || !Boolean(currentSkip)) currentSkip =0;
+    let userBooks = await User.findById(id, 'library', {lean: {getters: true},populate: {path: 'library', select: 'views name pages price cover', options:{perDocumentLimit: currentLimit, skip: currentSkip}}});
+    return res.status(200).json(userBooks)
+});
 
-module.exports = {editProfile, updatePassword, viewProfile}
+module.exports = {editProfile, updatePassword, viewProfile, userLibrary}

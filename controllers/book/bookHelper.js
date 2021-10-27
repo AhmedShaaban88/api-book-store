@@ -5,6 +5,7 @@ const User = require('../../models/user');
 const translation = require("../../utils/translation");
 const {downloadFile} = require("../../utils/cloudinary");
 const {createPayment, executePayment} = require("../../utils/paypal");
+const {checkUserPurchaseBook} = require('../../utils/checkBookAccess');
 const rateBook = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
     const {id: userId} = req.user;
@@ -47,11 +48,8 @@ const purchaseBookByPaypal = asyncHandler(async (req, res, next) => {
     const {id: bookId} = req.params;
     const {id: userId} = req.user;
     const book = await Book.findById(bookId, 'status price author downloads name description', {populate: {path: 'author', select: '_id paypalEmail'}, lean: true});
-    if(!book) return next(catchError.NotFound('This book doesn\'t exists'));
-    else if(book.status === 0 && String(book.author._id) !== String(userId)) next(catchError.Forbidden('You haven\'t access to this book'));
-    else if(book.price <= 0) return next(catchError.UnprocessableEntity('The book is free'));
-    else if(String(book.author._id) === String(userId)) return next(catchError.BadRequest('You shouldn\'t purchase your book!'));
-    else if(book.downloads.includes(userId)) return next(catchError.BadRequest('You have purchased this book before'));
+    const checkBook = await checkUserPurchaseBook(book, userId);
+    if(!book) return next(checkBook);
     const transactionLang = lang === "ar" ? 'ara' : 'en';
     const bookName = book.name.filter(bookName => bookName.language === transactionLang)[0].value;
     const bookDesc = book.description && book.description.filter(bookDesc => bookDesc.language === transactionLang)[0].value;
@@ -111,11 +109,8 @@ const purchaseBookByPaypalSuccess = asyncHandler(async (req, res,next) => {
     const {id: bookId} = req.params;
     const {id: userId} = req.user;
     const book = await Book.findById(bookId, 'status file price author downloads', {lean: true});
-    if(!book) return next(catchError.NotFound('This book doesn\'t exists'));
-    else if(book.status === 0 && String(book.author._id) !== String(userId)) next(catchError.Forbidden('You haven\'t access to this book'));
-    else if(book.price <= 0) return next(catchError.UnprocessableEntity('The book is free'));
-    else if(book.downloads.includes(userId)) return next(catchError.BadRequest('You have purchased this book before'));
-    else if(String(book.author._id) === String(userId)) return next(catchError.BadRequest('You shouldn\'t purchase your book!'));
+    const checkBook = await checkUserPurchaseBook(book, userId);
+    if(!book) return next(checkBook);
     const execute_payment_json = {
         "payer_id": PayerID,
         "transactions": [{
