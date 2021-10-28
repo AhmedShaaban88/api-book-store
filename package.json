@@ -18,6 +18,7 @@
     "express": "~4.16.1",
     "express-async-handler": "^1.1.4",
     "express-fingerprint": "^1.2.2",
+    "express-rate-limit": "^5.5.0",
     "googleapis": "^85.0.0",
     "helmet": "^4.6.0",
     "http-errors": "~1.6.3",
