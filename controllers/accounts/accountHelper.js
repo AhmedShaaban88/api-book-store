@@ -4,6 +4,8 @@ const catchError = require('http-errors');
 const sendEmail = require('../../utils/sendEmail');
 const translation = require("../../utils/translation");
 const {generateToken, generateRefreshToken, verifyRefreshToken} = require("../../utils/token");
+const {logInfo} = require("../../utils/logger");
+
 const resendVerificationEmail = asyncHandler(async (req, res, next)  => {
     const {email} = req.body;
     const {lang} = req.query;
@@ -16,6 +18,7 @@ const resendVerificationEmail = asyncHandler(async (req, res, next)  => {
     };
    const newUser = await User.updateOne({email: email}, {$set: {verifyCode: verifiedInfo.verifyCode, verifyCodeExpires: verifiedInfo.verifyCodeExpires}}, {lean: true, runValidators: true})
     if(newUser.nModified > 0){
+        await logInfo(req.path, req.method, 'resendVerificationEmail', {email: email});
         await sendEmail(lang, email,user.fullName, verifiedInfo.verifyCode, translation[lang].verifySubj ,translation[lang].verifyMessage, (err, response) => {
             if(response){
                 return res.status(200).json({message: translation[lang].resendVerification});
@@ -36,6 +39,7 @@ const verifyAccount = asyncHandler(async (req, res, next)  => {
         const token = await generateToken(user);
         const refreshToken = await generateRefreshToken(user);
         if(token && refreshToken){
+            await logInfo(req.path, req.method, 'verifyAccount', {email: email});
             return res.status(200).json({
                 name: user.fullName,
                 email: user.email,
@@ -54,6 +58,7 @@ const generateNewToken = asyncHandler(async (req, res, next)  => {
     if(validRefreshToken){
         const {email, sub: id, role} = validRefreshToken;
         const token = await generateToken({email, role, id});
+        await logInfo(req.path, req.method, 'generateNewToken', {email: email});
         return res.status(200).json({accessToken: token});
     }
 });

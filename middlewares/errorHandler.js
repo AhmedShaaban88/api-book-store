@@ -1,5 +1,6 @@
 const {removeFile} = require("../utils/cloudinary");
-module.exports = function (err, req, res, next) {
+const {logError} = require("../utils/logger");
+module.exports = async function (err, req, res, next) {
     if(req.file){
         removeFile(req.file.path, req.file.filename.split('/')[0]).then(r => next()).catch(e =>res.status(500).json({error: 'Unexpected error with cloudinary'}));
     }
@@ -25,9 +26,11 @@ module.exports = function (err, req, res, next) {
         return res.status(401).json({error: err.message});
     }
     else if(res) {
+        await logError(req.path, req.method, err.message || "Something wrong happen")
         return res
             .status(err.status || 500)
             .json({error: err.message || "Something wrong happen"});
     }
+    await logError(req.path, req.method, err.message)
     throw new Error(err.message)
 };

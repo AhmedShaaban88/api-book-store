@@ -3,6 +3,7 @@ const catchError = require('http-errors');
 const User = require("../../models/user");
 const {decryptPassword} = require('../../utils/password');
 const {generateToken, generateRefreshToken} = require('../../utils/token');
+const {logInfo} = require("../../utils/logger");
 
 const login = asyncHandler(async (req, res, next) => {
     const {email, password} = req.body
@@ -15,6 +16,7 @@ const login = asyncHandler(async (req, res, next) => {
     const refreshToken = await generateRefreshToken(user);
     if(token && refreshToken){
         const {email, avatar, _id, firstName, lastName, fullName} = user;
+        await logInfo(req.path, req.method, 'login', {email: email});
         return res.status(200).json({
             fullName: fullName,
             email: email,
