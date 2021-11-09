@@ -1,0 +1,403 @@
+{
+   "openapi": "3.0.1",
+   "info": {
+       "title": "Book Store API",
+       "version": "1.0.0",
+       "description": "A simple Book store app API",
+       "contact": {
+         "name": "Ahmed Shaaban",
+         "url": "https://portfolio-ahmed-shaaban.web.app/",
+         "email": "ahmedshaaban3288@gmail.com"
+       }
+   },
+    "servers": [
+            {
+                "url": "http://localhost:5000/api/{api_version}",
+                "description": "Sandbox server",
+                "variables": {
+                  "api_version": {
+                      "default": "v1"
+                  }
+                }
+            }
+        ],
+    "paths": {
+    "/sign-up": {
+        "post": {
+            "tags": [
+              "Public Routes"
+            ],
+            "summary": "Create new user or author",
+          "parameters": [
+            {"$ref": "#/components/parameters/langQuery"}
+          ],
+          "requestBody": {
+            "$ref": "#/components/requestBodies/signupBody"
+          },
+          "responses": {
+            "201": {
+              "$ref": "#/components/responses/CreatedSuccessfully"
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "422": {
+              "$ref": "#/components/responses/ValidationError"
+            },
+            "409": {
+              "$ref": "#/components/responses/DuplicationError"
+            },
+            "401": {
+              "$ref": "#/components/responses/JWTError"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalError"
+            }
+          }
+        }
+    },
+    "/book/{id}": {
+        "post": {
+          "tags": ["Public Routes"],
+          "summary": "get book details",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/id"
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "required": true,
+                      "description": "user id",
+                      "example": "6189039c506b47330039977d"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/GetBook"
+            }
+          }
+        }
+      },
+    "/auth/rate/{id}": {
+      "put": {
+        "tags": [
+          "Protected Routes"
+        ],
+        "summary": "rate a book",
+        "security": [
+          {
+            "bearerToken": []
+          }
+        ],
+        "parameters": [
+          {"$ref": "#/components/parameters/langQuery"},
+          {"$ref": "#/components/parameters/id"}
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rate": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 5,
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RateSuccessfully"
+          },
+          "403": {
+            "$ref": "#/components/responses/NotThisUser"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "409": {
+            "$ref": "#/components/responses/DuplicationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/JWTError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+    },
+
+    "components": {
+      "schemas": {
+        "registerSchema": {
+          "type": "object",
+          "properties": {
+            "email": {
+             "$ref": "#/components/schemas/emailSchema"
+            },
+            "password": {
+             "$ref": "#/components/schemas/passwordSchema"
+            },
+            "confirmPassword": {
+              "$ref": "#/components/schemas/passwordSchema"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["user","author","admin"],
+              "default": "user"
+            },
+            "avatar": {
+              "type": "string",
+              "format": "binary",
+              "nullable": false
+            },
+            "firstName": {
+              "$ref": "#/components/schemas/nameSchema"
+            },
+            "lastName": {
+              "$ref": "#/components/schemas/nameSchema"
+            },
+            "paypalEmail": {
+              "$ref": "#/components/schemas/emailSchema"
+            }
+          },
+          "required": ["email","password","confirmPassword"]
+        },
+        "nameSchema": {
+          "type": "string",
+          "minLength": "2"
+        },
+        "passwordSchema": {
+          "type": "string",
+          "format": "password",
+          "minLength": 8
+        },
+        "emailSchema": {
+          "type": "string",
+          "format": "email"
+        },
+        "bookSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string",
+                    "enum": ["ara","en"]
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "avgRate": {
+              "type": "number"
+            },
+            "views": {
+              "type": "number"
+            },
+            "downloads": {
+              "type": "number"
+            },
+            "pages": {
+              "type": "number"
+            }
+          }
+        },
+        "createdResSchema": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            },
+            "userId": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            }
+          }
+        },
+        "GeneralErrorResSchema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "string"
+            }
+          }
+        },
+        "GeneralMessage": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "parameters": {
+          "langQuery": {
+              "in": "query",
+              "name": "lang",
+            "schema": {
+              "default": "en",
+              "enum": ["en","ara"]
+            }
+          },
+        "id":   {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "6189039c506b47330039977d"
+          }
+        }
+        },
+      "securitySchemes": {
+          "bearerToken": {
+              "type": "http",
+              "scheme": "bearer",
+              "bearerFormat": "JWT"
+          }
+        },
+      "requestBodies": {
+        "signupBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/registerSchema"
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "CreatedSuccessfully": {
+          "description": "create user successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref":"#/components/schemas/createdResSchema"
+              }
+            }
+          }
+        },
+        "RateSuccessfully": {
+          "description": "rate book successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralMessage"
+              }
+            }
+          }
+        },
+        "GetBook": {
+          "description": "get book successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bookSchema"
+              }
+            }
+          }
+        },
+        "NotThisUser": {
+          "description": "authenticated user but not allowed to do this",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralErrorResSchema"
+              }
+            }
+          }
+        },
+        "NotFound": {
+          "description": "this item not exists",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralErrorResSchema"
+              }
+            }
+          }
+        },
+        "BadRequest": {
+          "description": "error in user input",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralErrorResSchema"
+              }
+            }
+          }
+        },
+        "ValidationError": {
+          "description": "validation error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralErrorResSchema"
+              }
+            }
+          }
+        },
+        "DuplicationError": {
+          "description": "duplicate items error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralErrorResSchema"
+              }
+            }
+          }
+        },
+        "JWTError": {
+          "description": "json token error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralErrorResSchema"
+              }
+            }
+          }
+        },
+        "InternalError": {
+          "description": "server error or unexpected error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralErrorResSchema"
+              }
+            }
+          }
+        }
+      }
+    }
+}

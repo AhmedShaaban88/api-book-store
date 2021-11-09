@@ -18,7 +18,7 @@ publicRoutes.post("/reset-password", genericValidation('resetPasswordSchema'),re
 publicRoutes.post("/login", genericValidation('loginSchema'), login);
 
 //without any auth
-publicRoutes.get("/book/:id", checkIdParam('bookId'), Fingerprint(), getBook)
+publicRoutes.post("/book/:id", checkIdParam('bookId'), Fingerprint(), getBook)
 
 
 module.exports = publicRoutes;
