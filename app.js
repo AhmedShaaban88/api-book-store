@@ -1,5 +1,6 @@
 require('dotenv').config();
 require('./utils/initialDB');
+require('./utils/Redis/redisConfig');
 const express = require('express');
 const path = require('path');
 const helmet = require("helmet");
@@ -26,7 +27,7 @@ const limiter = rateLimit({
     message: "Too many accounts created from this IP, please try again after an 15 Minutes"
 });
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use(`/api${process.env.api_version}`,limiter, publicRoutes);
+app.use(`/api${process.env.api_version}`, limiter, publicRoutes);
 app.use(`/api${process.env.api_version}/auth`, protectedRoutes);
 app.use(function (req, res, next) {
     next(catchError.NotFound());

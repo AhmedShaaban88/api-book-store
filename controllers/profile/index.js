@@ -4,7 +4,7 @@ const User = require("../../models/user");
 const {decryptPassword} = require('../../utils/password');
 const translation = require("../../utils/translation");
 const {removeFile} = require('../../utils/cloudinary');
-
+const {getCachedData, setCacheData} = require("../../utils/Redis/asyncCommands");
 const editProfile = asyncHandler(async (req, res, next) => {
     const {lang} = req.query;
     const {firstName, lastName, paypalEmail} = req.body;
@@ -18,8 +18,9 @@ const editProfile = asyncHandler(async (req, res, next) => {
         const {path} = req.file;
         newAvatar = path;
     }
-    const updatedUser = await User.updateOne({_id:id}, {$set: {firstName: firstName, lastName: lastName, avatar: newAvatar, paypalEmail: paypalEmail}}, {omitUndefined: true, runValidators: true, lean: true});
-    if(updatedUser.nModified > 0){
+    const updatedUser = await User.findByIdAndUpdate(id, {$set: {firstName: firstName, lastName: lastName, avatar: newAvatar, paypalEmail: paypalEmail}}, {omitUndefined: true, runValidators: true, lean: {virtuals: true}, new: true, projection: '-__v -_id'});
+    if(updatedUser){
+        await setCacheData("Profile", id.toString(), JSON.stringify(updatedUser));
         return res.status(200).json({message: translation[lang].updateProfile})
     }
     return next(catchError.UnprocessableEntity('Error while updating this user'));
@@ -41,9 +42,14 @@ const updatePassword = asyncHandler(async (req, res, next) => {
 });
 const viewProfile = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
-    const user = await User.findById(id).lean({virtuals: true}).select("-__v -_id");
-    if(!user) return next(catchError.NotFound('This user does not exist'));
-    return res.status(200).json(user)
+    const cachedData = await getCachedData("Profile", id.toString());
+    if(!cachedData){
+        const user = await User.findById(id).lean({virtuals: true}).select("-__v -_id");
+        if(!user) return next(catchError.NotFound('This user does not exist'));
+        await setCacheData("Profile", id.toString(), JSON.stringify(user));
+        return res.status(200).json(user)
+    }
+    return res.status(200).json(cachedData);
 });
 const userLibrary = asyncHandler(async (req,res,next) => {
     const {id}  = req.user;
