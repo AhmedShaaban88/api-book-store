@@ -12,9 +12,9 @@ Express based application for books
 # Features:
 1. use cloudinary to upload images and pdf files
 2. peacful shutdown when error raising
-3. compress responses return from api
+3. compress responses return from api and some other techniques for performance
 4. use template html for server "ejs"
-5. rate limit for brute force attacks
+5. rate limit for brute force attacks and alot of techniques for security
 6. use google gmail for emails
 7. multiple language "arabic - english"
 8. use bearer tokens for access & refresh tokens
