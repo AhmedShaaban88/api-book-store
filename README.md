@@ -17,6 +17,11 @@ Express based application for books
 5. rate limit for brute force attacks
 6. use google gmail for emails
 7. multiple language "arabic - english"
+8. use bearer tokens for access & refresh tokens
+9. buy books with paypal gateway
+10. log info and errors with winston
+11. add redis db for server caching
+12. use swagger for documentation
 
 
 # notes
