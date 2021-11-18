@@ -2,3 +2,4 @@
 /node_modules
 .book-store.gzip
 /logs
+.env
