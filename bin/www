@@ -5,6 +5,7 @@ const debug = require('debug')('book-store:server');
 const http = require('http');
 const { createTerminus } = require('@godaddy/terminus');
 const mongoose = require('mongoose');
+const redisClient = require("../utils/Redis/redisConfig");
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 const port = normalizePort(process.env.PORT || '4000');
@@ -25,6 +26,7 @@ const onSignal = () => {
       }
       mongoose.connection.close(false, () => {
         console.log('MongoDb connection closed.');
+        redisClient.quit();
         process.exit(0)
       });
 
@@ -38,7 +40,6 @@ function onHealthCheck ({ state }) {
   return Promise.resolve('force shutdown')
 }
 const options = {
-  // logger: console,
   signals: ['SIGINT', 'SIGTERM'],
   healthChecks: {
     '/healthcheck': onHealthCheck
@@ -55,7 +56,7 @@ if (cluster.isMaster) {
   }
 
   cluster.on('exit', (worker, code, signal) => {
-    process.env.NODE_ENV === "dev" && console.log(`worker ${worker.process.pid} died ${worker.id}`);
+    process.env.NODE_ENV === "dev" && console.log(`worker ${worker.process.pid} died`);
     cluster.fork();
   });
 }else {

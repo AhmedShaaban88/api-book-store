@@ -3,10 +3,11 @@ const catchError = require('http-errors');
 const {spawn} = require('child_process');
 const fs = require("fs");
 const path = require("path");
+const User = require('../../models/user');
+const translation = require("../../utils/translation");
+const {removeFile} = require('../../utils/cloudinary');
+
 const deleteUser = asyncHandler(async (req, res, next) => {
-    const User = require('../../models/user');
-    const translation = require("../../utils/translation");
-    const {removeFile} = require('../../utils/cloudinary');
     const {id: userId} = req.params;
     const {lang} = req.query;
     const user = await User.findByIdAndDelete(userId, {lean: true, runValidators: true, returnOriginal: true, omitUndefined: true});
